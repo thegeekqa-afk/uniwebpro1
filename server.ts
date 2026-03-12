@@ -44,7 +44,7 @@ async function initDb() {
   console.log("   - DB_NAME:", process.env.DB_NAME ? "SET" : "NOT SET");
 
   const dbConfig = {
-    host: process.env.DB_HOST || '127.0.0.1',
+    host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '3306'),
     user: process.env.DB_USER || 'u785806933_uniweb',
     password: process.env.DB_PASSWORD || 'L7|B$jh+4f',
@@ -70,8 +70,13 @@ async function initDb() {
     console.error("❌ MySQL connection failed!");
     console.error("Error code:", error.code);
     console.error("Error message:", error.message);
+    
+    if (error.code === 'ER_ACCESS_DENIED_ERROR') {
+      console.warn("💡 TIP: Access Denied. Try changing DB_HOST to 'localhost' instead of '127.0.0.1' in Hostinger panel.");
+      console.warn("💡 Also, verify that the password 'L7|B$jh+4f' is exactly what you set in the MySQL section.");
+    }
+    
     console.warn("Falling back to In-Memory Mock for preview mode.");
-    console.info("If you are in Hostinger, double check your DB_HOST, DB_USER, DB_PASSWORD, and DB_NAME in the .env file or environment variables.");
     useMock = true;
   }
 }

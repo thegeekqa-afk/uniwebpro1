@@ -37,8 +37,15 @@ const mockDb: any = {
 };
 
 async function initDb() {
+  console.log("🔍 Environment variables check:");
+  console.log("   - DB_HOST:", process.env.DB_HOST ? "SET" : "NOT SET");
+  console.log("   - DB_USER:", process.env.DB_USER ? "SET" : "NOT SET");
+  console.log("   - DB_PASSWORD:", process.env.DB_PASSWORD ? "SET" : "NOT SET");
+  console.log("   - DB_NAME:", process.env.DB_NAME ? "SET" : "NOT SET");
+
   const dbConfig = {
     host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT || '3306'),
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME || 'u785806933_uniweb',
@@ -47,18 +54,24 @@ async function initDb() {
     queueLimit: 0
   };
 
+  console.log("🔍 Attempting to connect to database with host:", dbConfig.host);
+  console.log("🔍 Database name:", dbConfig.database);
+  console.log("🔍 Database user:", dbConfig.user);
+
   try {
     // Try MySQL first
     pool = mysql.createPool(dbConfig);
     // Test connection
     const connection = await pool.getConnection();
     connection.release();
-    console.log("✅ Connected to MySQL Database:", dbConfig.database);
+    console.log("✅ Connected to MySQL Database successfully!");
+    useMock = false;
   } catch (error: any) {
     console.error("❌ MySQL connection failed!");
-    console.error("Error details:", error.message);
+    console.error("Error code:", error.code);
+    console.error("Error message:", error.message);
     console.warn("Falling back to In-Memory Mock for preview mode.");
-    console.info("If you are in Hostinger, make sure your .env variables are correct.");
+    console.info("If you are in Hostinger, double check your DB_HOST, DB_USER, DB_PASSWORD, and DB_NAME in the .env file or environment variables.");
     useMock = true;
   }
 }
@@ -228,15 +241,35 @@ app.get("/api/stats", async (req, res) => {
     const [est]: any = await query("SELECT COUNT(*) as count FROM estudiantes");
     const [car]: any = await query("SELECT COUNT(*) as count FROM carreras");
     const [mat]: any = await query("SELECT COUNT(*) as count FROM materias");
+    
+    // Safety check for empty results
+    const totalEstudiantes = est && est[0] ? est[0].count : 0;
+    const totalCarreras = car && car[0] ? car[0].count : 0;
+    const totalMaterias = mat && mat[0] ? mat[0].count : 0;
+
     res.json({ 
-      totalEstudiantes: est[0].count, 
-      totalCarreras: car[0].count, 
-      totalMaterias: mat[0].count,
+      totalEstudiantes, 
+      totalCarreras, 
+      totalMaterias,
       isMock: useMock
     });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
+});
+
+app.get("/api/trends", async (req, res) => {
+  // Mock trend data for now, but could be real queries
+  const trends = [
+    { name: 'Ene', estudiantes: 400, egresados: 240 },
+    { name: 'Feb', estudiantes: 300, egresados: 139 },
+    { name: 'Mar', estudiantes: 200, egresados: 980 },
+    { name: 'Abr', estudiantes: 278, egresados: 390 },
+    { name: 'May', estudiantes: 189, egresados: 480 },
+    { name: 'Jun', estudiantes: 239, egresados: 380 },
+    { name: 'Jul', estudiantes: 349, egresados: 430 },
+  ];
+  res.json(trends);
 });
 
 // --- VITE MIDDLEWARE ---

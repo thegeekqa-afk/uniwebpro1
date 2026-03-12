@@ -44,10 +44,10 @@ async function initDb() {
   console.log("   - DB_NAME:", process.env.DB_NAME ? "SET" : "NOT SET");
 
   const dbConfig = {
-    host: process.env.DB_HOST || 'localhost',
+    host: process.env.DB_HOST || '127.0.0.1',
     port: parseInt(process.env.DB_PORT || '3306'),
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
+    user: process.env.DB_USER || 'u785806933_uniweb',
+    password: process.env.DB_PASSWORD || 'L7|B$jh+4f',
     database: process.env.DB_NAME || 'u785806933_uniweb',
     waitForConnections: true,
     connectionLimit: 5,
